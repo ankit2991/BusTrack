@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:bus/my_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
@@ -9,6 +10,7 @@ class api {
     bool serviceEnable = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnable) {
       Geolocator.openLocationSettings();
+      get_permission();
       return Future.error("Location services are disabled.");
     }
     LocationPermission permission = await Geolocator.checkPermission();
@@ -66,17 +68,23 @@ class api {
     }
     //  loader(false);
     return await Geolocator.getCurrentPosition(
-      locationSettings: LocationSettings(accuracy: LocationAccuracy.bestForNavigation,),forceAndroidLocationManager: true,
+      locationSettings: LocationSettings(
+        accuracy: LocationAccuracy.bestForNavigation,
+      ),
+      forceAndroidLocationManager: true,
     );
   }
 
   static Future<void> send_let_log({
-    required String Divice_Id,
+    required String DriverId,
     required String lat,
     required String long,
+    required String DeviceId,
+    required String EpochId,
   }) async {
+    var a = background_service.prefs.getString("id");
     String url =
-        'https://schoolappapi.schoolsoftwaresolution.in/MobApi.asmx/MobileApi?ParmCriteria={"DriverId":"$Divice_Id","Latitude":"$lat","Longitude":"$long","ApiAdd":"DriverLatitudeLongitude","CallBy":"MobileApi","AuthKey":"AK101"}&SchID=VSS&ApiAdd=DriverLatitudeLongitude';
+        'https://schoolappapi.schoolsoftwaresolution.in/MobApi.asmx/MobileApi?ParmCriteria={"DriverId":"$a","DeviceId":"$DeviceId","Latitude":"$lat","Longitude":"$long","EpochId":"$EpochId","ApiAdd":"DriverLatitudeLongitude","CallBy":"MobileApi","AuthKey":"AK101"}&SchID=VSS&ApiAdd=DriverLatitudeLongitude';
     var res = await http.get(Uri.parse(url));
     Map<String, dynamic> data;
     print(url);
