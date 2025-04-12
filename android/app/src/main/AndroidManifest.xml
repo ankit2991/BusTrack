@@ -9,6 +9,7 @@
 <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
 <uses-permission android:name="android.permission.WAKE_LOCK"/>
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
   <!--
     Permission to use here depends on the value you picked for foregroundServiceType - see the Android documentation.
@@ -19,7 +20,19 @@
         android:label="bus"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true"
         >
+        <receiver
+            android:name="com.example.bus.MyBootReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </receiver>
+        
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -48,7 +61,8 @@
         /> -->
         <service
             android:name="id.flutter.flutter_background_service.BackgroundService"
-            android:exported="false"
+            android:exported="true"
+            android:enabled="true"
             android:foregroundServiceType="location|dataSync"
             tools:replace="android:exported"/>
         <!-- <service

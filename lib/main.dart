@@ -21,8 +21,8 @@ void main() async {
   // await api.get_permission();
   // await background_service
   //     .initializeService(); // ✅ Initialize background service properly
-  var a = background_service.prefs.getString("id");
-  runApp(a != null && a != "-1" ? MyApp() : get_id());
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -33,7 +33,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final FlutterBackgroundService _service = FlutterBackgroundService();
   @override
-  bool is_start = false;
+  bool? is_start = false;
   bool isConnected = false;
   bool loader = false;
   String? Divice_Id;
@@ -71,9 +71,13 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _checkServiceStatus() async {
-    bool running = await _service.isRunning();
+    // bool running = await _service.isRunning();
+    is_start = await background_service.prefs.getBool('service');
     setState(() {
-      is_start = running;
+      is_start = is_start ?? false;
+      if (is_start == false) {
+        _service.invoke("stopService");
+      }
     });
   }
 
@@ -113,89 +117,101 @@ class _MyAppState extends State<MyApp> {
   //   }
   @override
   Widget build(BuildContext context) {
+    var a = background_service.prefs.getString("id");
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text(Divice_Id ?? ""),
-          actions: [
-            OutlinedButton.icon(
-              onPressed: () async {
-                _service.invoke("stopService");
-                await background_service.prefs.setString("id", "-1");
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => get_id()),
-                );
-              },
-              label: Text("log out"),
-            ),
-          ],
-        ),
-        body:
-            loader
-                ? CircularProgressIndicator()
-                : isConnected
-                ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: GestureDetector(
-                        onTap: () async {
-                          int contain_epo =
-                              DateTime.now().millisecondsSinceEpoch;
-                          await background_service.prefs.setInt(
-                            'epoch',
-                            contain_epo,
-                          );
-                          await background_service.prefs.setBool(
-                            'service',
-                            !is_start,
-                          );
-                          setState(() {
-                            is_start = !is_start;
-                            if (is_start) {
-                              print(background_service.prefs.getInt("epoch"));
-                              _service.startService();
-                              // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Service Start")));
-                            } else {
-                              _service.invoke("stopService");
-                              // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Service off")));
-                            }
-                          });
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          child:
-                              is_start
-                                  ? Lottie.asset(
-                                    'assets/lottie files/stop.json',
-                                  )
-                                  : Lottie.asset('assets/lottie files/go.json'),
-                        ),
-                      ),
+      home:
+          a != null && a != "-1"
+              ? Scaffold(
+                appBar: AppBar(
+                  title: Text(Divice_Id ?? ""),
+                  actions: [
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        _service.invoke("stopService");
+                        await background_service.prefs.setString("id", "-1");
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => get_id()),
+                        );
+                      },
+                      label: Text("log out"),
                     ),
-                    // ElevatedButton(
-                    //   onPressed: () {
-                    //     _service.startService();
-                    //     setState(() {});
-                    //   },
-                    //   child: Text("Start"),
-                    // ),
-                    // Center(child: Text('Running...')),
-                    // ElevatedButton(
-                    //   onPressed: () {
-                    //     _service.invoke("stopService");
-                    //     setState(() {});
-                    //   },
-                    //   child: Text("Stop"),
-                    // ),
                   ],
-                )
-                : LottieBuilder.asset("assets/lottie files/no internet.json"),
-      ),
+                ),
+                body:
+                    loader
+                        ? CircularProgressIndicator()
+                        : isConnected
+                        ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: GestureDetector(
+                                onTap: () async {
+                                  int contain_epo =
+                                      DateTime.now().millisecondsSinceEpoch;
+                                  await background_service.prefs.setInt(
+                                    'epoch',
+                                    contain_epo,
+                                  );
+                                  await background_service.prefs.setBool(
+                                    'service',
+                                    !is_start!,
+                                  );
+                                  setState(() {
+                                    is_start = !is_start!;
+                                    if (is_start!) {
+                                      print(
+                                        background_service.prefs.getInt(
+                                          "epoch",
+                                        ),
+                                      );
+                                      _service.startService();
+                                      // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Service Start")));
+                                    } else {
+                                      _service.invoke("stopService");
+                                      // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Service off")));
+                                    }
+                                  });
+                                },
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  child:
+                                      is_start!
+                                          ? Lottie.asset(
+                                            'assets/lottie files/stop.json',
+                                          )
+                                          : Lottie.asset(
+                                            'assets/lottie files/go.json',
+                                          ),
+                                ),
+                              ),
+                            ),
+                            // ElevatedButton(
+                            //   onPressed: () {
+                            //     _service.startService();
+                            //     setState(() {});
+                            //   },
+                            //   child: Text("Start"),
+                            // ),
+                            // Center(child: Text('Running...')),
+                            // ElevatedButton(
+                            //   onPressed: () {
+                            //     _service.invoke("stopService");
+                            //     setState(() {});
+                            //   },
+                            //   child: Text("Stop"),
+                            // ),
+                          ],
+                        )
+                        : LottieBuilder.asset(
+                          "assets/lottie files/no internet.json",
+                        ),
+              )
+              : get_id(),
     );
   }
 }

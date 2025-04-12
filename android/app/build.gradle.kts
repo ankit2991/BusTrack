@@ -36,11 +36,17 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
-        }
+            isMinifyEnabled = true  // Enable ProGuard or R8 minification
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"), // Default ProGuard file
+                "./proguard-rules.pro"  // Custom ProGuard rules file
+            )
+   }
     }
 }
 dependencies {
     add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.1.4")
+    implementation("com.google.android.play:core:1.10.3")
 }
 flutter {
     source = "../.."

@@ -27,7 +27,7 @@ class _get_idState extends State<get_id> {
                     "id",
                     id_con.text.trim(),
                   );
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => MyApp()),
                   );
